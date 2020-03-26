@@ -1,13 +1,36 @@
 import React, { Component } from "react";
 import {FiArrowLeft} from 'react-icons/fi';
-import {Link} from "react-router-dom";
+import {Link, withRouter} from "react-router-dom";
+import api from '../../services/api';
 
 import logoImg from "../../assets/logo.svg";
 import './styles.css';
 
-export default class NewIncident extends Component {
+class NewIncident extends Component {
     constructor(props) {
         super(props);
+
+        this.state = {
+            title: '',
+            description: '',
+            value: '',
+        };
+
+        this.handleSubmit = this.handleSubmit.bind(this);
+    }
+
+    handleSubmit(e) {
+        e.preventDefault();
+
+        const {history} = this.props;
+        const ongId = localStorage.getItem('ongId');
+        api.post('/incidents', this.state, {
+            headers: {
+                Authorization: ongId
+            }
+        }).then(response => {
+            history.push('/profile');
+        });
     }
 
     render() {
@@ -25,10 +48,21 @@ export default class NewIncident extends Component {
                             Voltar para home
                         </Link>
                     </section>
-                    <form>
-                        <input type="text" placeholder={'Título do caso'}/>
-                        <textarea placeholder={'Descrição'}/>
-                        <input type="text" placeholder={'Valor em Reais'}/>
+                    <form onSubmit={this.handleSubmit}>
+                        <input
+                            value={this.state.title}
+                            onChange={e => {this.setState({title: e.target.value})}}
+                            type="text"
+                            placeholder={'Título do caso'}/>
+                        <textarea
+                            value={this.state.description}
+                            onChange={e => {this.setState({description: e.target.value})}}
+                            placeholder={'Descrição'}/>
+                        <input
+                            value={this.state.value}
+                            onChange={e => {this.setState({value: e.target.value})}}
+                            type="text"
+                            placeholder={'Valor em Reais'}/>
                         <button className="button">Cadastrar</button>
                     </form>
                 </div>
@@ -36,3 +70,5 @@ export default class NewIncident extends Component {
         );
     }
 }
+
+export default withRouter(NewIncident);
